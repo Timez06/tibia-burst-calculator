@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kalkulator Burst Arrow – Distance Skill</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+    }
+    h1 { color: #38bdf8; }
+    label { display: block; margin-top: 12px; }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border-radius: 6px;
+      border: none;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px;
+      width: 100%;
+      background: #22c55e;
+      color: #022c22;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 25px;
+      padding: 15px;
+      background: #020617;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🎯 Kalkulator skilowania RP (Burst Arrow)</h1>
+
+<label>Aktualny distance skill (base)</label>
+<input id="startSkill" type="number" value="91" />
+
+<label>Procent do następnego levela (%)</label>
+<input id="startPercent" type="number" value="60" />
+
+<label>Docelowy distance skill</label>
+<input id="targetSkill" type="number" value="100" />
+
+<label>Cena 1 burst arrowa (gp)</label>
+<input id="arrowPrice" type="number" value="25" />
+
+<label>
+  <input id="x2event" type="checkbox" checked /> Event x2 skill
+</label>
+
+<button onclick="calculate()">📊 Oblicz</button>
+
+<div class="result" id="output"></div>
+
+<script>
+// Dane bazowe z testów
+const ARROWS_PER_PERCENT_91 = 370.5;
+const SECONDS_PER_PERCENT_91 = 733; // 7.33 s
+const GROWTH = 1.055; // +5.5% per level
+
+function calculate() {
+  const startSkill = Number(document.getElementById('startSkill').value);
+  const startPercent = Number(document.getElementById('startPercent').value);
+  const targetSkill = Number(document.getElementById('targetSkill').value);
+  const arrowPrice = Number(document.getElementById('arrowPrice').value);
+  const x2 = document.getElementById('x2event').checked;
+
+  let totalArrows = 0;
+  let totalSeconds = 0;
+
+  for (let skill = startSkill; skill < targetSkill; skill++) {
+    const modifier = Math.pow(GROWTH, skill - 91);
+    const percentNeeded = (skill === startSkill) ? startPercent : 100;
+
+    let arrows = percentNeeded * ARROWS_PER_PERCENT_91 * modifier;
+    let seconds = percentNeeded * SECONDS_PER_PERCENT_91 * modifier;
+
+    if (x2) {
+      arrows /= 2;
+      seconds /= 2;
+    }
+
+    totalArrows += arrows;
+    totalSeconds += seconds;
+  }
+
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const gpCost = Math.round(totalArrows * arrowPrice);
+
+  document.getElementById('output').innerHTML = `
+    <h2>📌 Wynik</h2>
+    <p><strong>Burst arrowy:</strong> ${Math.round(totalArrows).toLocaleString()}</p>
+    <p><strong>Czas:</strong> ${hours} h ${minutes} min</p>
+    <p><strong>Koszt:</strong> ${gpCost.toLocaleString()} gp</p>
+  `;
+}
+</script>
+
+</body>
+</html>
